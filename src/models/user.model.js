@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
     }
 
 },{timestamps:true})
-const User = mongoose.model('User', userSchema);
+
 
 userSchema.pre("save",async function (next) {
     if(!this.isModified("password")) return next();
@@ -60,19 +60,20 @@ userSchema.methods.isPasswordCorrect=async function (password) {
     
 }
 userSchema.methods.generateAccessToken=function(){
-    jwt.sign({
+    return jwt.sign({
         _id:this.id,
         username:this.username,
         email:this.email,
         fullname:this.fullname,
     },
-process.env.ACCESS_TOKEN_SECRET,{expiresIn:ACCESS_TOKEN_EXPIRY})
+process.env.ACCESS_TOKEN_SECRET,{expiresIn:process.env.ACCESS_TOKEN_EXPIRY || '1h'})
 }
 userSchema.methods.generateRefreshToken=function(){
-    jwt.sign({
+   return jwt.sign({
         _id:this.id,
     },
-process.env.ACCESS_TOKEN_REFRESH,{expiresIn:REFRESH_TOKEN_EXPIRY})
+process.env.ACCESS_TOKEN_REFRESH,{expiresIn:process.env.REFRESH_TOKEN_EXPIRY})
 }
+const User = mongoose.model('User', userSchema);
 
 export default User;
